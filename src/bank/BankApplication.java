@@ -18,7 +18,7 @@ public class BankApplication {
 			System.out.println("--------------------------------------------------------------------------");
 			System.out.println("1.계좌개설 | 2.계좌조회 | 3.입금 | 4.출금 | 5.계좌송금 | 6.$환전 | 7.비밀번호변경 | 8.종료");
 			System.out.println("--------------------------------------------------------------------------");
-			System.out.print("선택> ");
+			System.out.print("실행하실 항목의 번호를 입력해주십시오. >> ");
 
 			String selectNo = scanner.nextLine();
 
@@ -35,8 +35,14 @@ public class BankApplication {
 				showAccount();
 				break;
 			case 3:
+				System.out.println("------------------------------------------------");
+				System.out.println("===================== 입   금 =====================");
+				bankDeposit();
 				break;
 			case 4:
+				System.out.println("------------------------------------------------");
+				System.out.println("===================== 출   금 =====================");
+				bankWithdraw();
 				break;
 			case 5:
 				break;
@@ -45,7 +51,7 @@ public class BankApplication {
 			case 7:
 				break;
 			default:
-				System.out.println("1~5 중에서 입력하시오.");
+				System.out.print("1~8 중에서 입력해주십시오. >> ");
 				break;
 			case 8:
 				System.out.println("안녕히 가십시오.");
@@ -61,6 +67,7 @@ public class BankApplication {
 		accountBalance = (int) (Math.round((Math.random() * 10000 + 500) / 1000) * 1000); // 1000~10000원 지급
 		System.out.println("축하합니다! " + accountBalance + "원에 당첨되었습니다.");
 		accountNumber = String.format("110-410-%06d", accounts.size() + 1); // 계좌번호 뒷자리 부여
+		// 신규 계좌를 0번 리스트에 입력 및 출력
 		accounts.add(0, new BankAccount(accountNumber, accountOwner, accountPassword, accountBalance));
 		System.out.println("계좌가 개설되었습니다.");
 		System.out.println(accounts.get(0));
@@ -101,9 +108,8 @@ public class BankApplication {
 		default:
 			System.out.print("계좌 비밀번호를 입력해주십시오. >> ");
 			tmp = scanner.nextLine();
-			int input = Integer.parseInt(tmp);
 			// 계좌의 비밀번호와 맞는지 검사
-			if (accounts.get(accountIndex).getAccountPassword() == input)
+			if (accounts.get(accountIndex).getAccountPassword() == Integer.parseInt(tmp))
 				System.out.println(accounts.get(accountIndex));
 			else
 				System.out.println("비밀번호가 틀렸습니다.");
@@ -121,5 +127,57 @@ public class BankApplication {
 			}
 		}
 		return findAccount;
+	}
+
+	// 3.입금
+	public static void bankDeposit() {
+		System.out.print("입금할 계좌 번호를 입력해주십시오. >> ");
+		String tmp = scanner.nextLine().replaceAll(" |-", ""); // 공백, - 제거
+		tmp = tmp.substring(0, 3) + "-" + tmp.substring(3, 6) + "-" + tmp.substring(6); // 양식에 맞게 - 삽입
+		int accountIndex = accounts.indexOf(findAccount(tmp)); // 계좌번호에 맞는 계좌를 검색하여 해당 인덱스 저장
+		switch (accountIndex) { // 인덱스에 따른 루트
+		case -1: // 계좌번호에 맞는 계좌가 없을 시
+			System.out.println("없는 계좌입니다.");
+			break;
+		default:
+			System.out.print("넣으실 금액을 입력해주십시오. >> ");
+			tmp = scanner.nextLine();
+			// 계좌의 잔고를 불러와 입금액을 더한 뒤 잔고를 업데이트
+			accounts.get(accountIndex)
+					.setAccountBalance(accounts.get(accountIndex).getAccountBalance() + Integer.parseInt(tmp));
+			System.out.println(accounts.get(accountIndex)); // 업데이트된 계좌 출력
+		}
+	}
+
+	// 4.출금
+	public static void bankWithdraw() {
+		System.out.print("출금할 계좌 번호를 입력해주십시오. >> ");
+		String tmp = scanner.nextLine().replaceAll(" |-", ""); // 공백, - 제거
+		tmp = tmp.substring(0, 3) + "-" + tmp.substring(3, 6) + "-" + tmp.substring(6); // 양식에 맞게 - 삽입
+		int accountIndex = accounts.indexOf(findAccount(tmp)); // 계좌번호에 맞는 계좌를 검색하여 해당 인덱스 저장
+		switch (accountIndex) { // 인덱스에 따른 루트
+		case -1: // 계좌번호에 맞는 계좌가 없을 시
+			System.out.println("없는 계좌입니다.");
+			break;
+		default:
+			System.out.print("계좌 비밀번호를 입력해주십시오. >> ");
+			tmp = scanner.nextLine();
+			// 계좌의 비밀번호와 맞는지 검사
+			if (accounts.get(accountIndex).getAccountPassword() != Integer.parseInt(tmp)) {
+				System.out.println("비밀번호가 틀렸습니다.");
+				break;
+			}
+			System.out.print("찾으실 금액을 입력해주십시오. >> ");
+			tmp = scanner.nextLine();
+			// 계좌의 잔고를 불러와 출금액을 뺀 뒤 잔고를 업데이트
+			int withdraw = accounts.get(accountIndex).getAccountBalance() - Integer.parseInt(tmp);
+			// 잔고가 충분한지 검사
+			if (withdraw < 0) {
+				System.out.println("잔고가 부족합니다.");
+				break;
+			}
+			accounts.get(accountIndex).setAccountBalance(withdraw);
+			System.out.println(accounts.get(accountIndex)); // 업데이트된 계좌 출력
+		}
 	}
 }
