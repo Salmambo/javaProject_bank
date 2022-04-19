@@ -15,25 +15,9 @@ public class BankAccount {
 		this.accountBalance = accountBalance;
 	}
 
-	public BankAccount(String accountNumber) {
-		this.accountNumber = accountNumber;
-	}
-
 	// 게터&세터
-	public String getAccountNumber() {
-		return accountNumber;
-	}
-
-	public void setAccountNumber(String accountNumber) {
-		this.accountNumber = accountNumber;
-	}
-
 	public String getAccountOwner() {
 		return accountOwner;
-	}
-
-	public void setAccountOwner(String accountOwner) {
-		this.accountOwner = accountOwner;
 	}
 
 	public int getAccountPassword() {
