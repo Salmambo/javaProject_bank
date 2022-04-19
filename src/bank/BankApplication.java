@@ -17,7 +17,7 @@ public class BankApplication {
 		while (run) {
 			System.out.println("--------------------------------------------------------------------------");
 			System.out.println("1.계좌개설 | 2.계좌조회 | 3.입금 | 4.출금 | 5.계좌송금 | 6.$환전 | 7.비밀번호변경 | 8.종료");
-			System.out.println("--------------------------------------------------------------------------");
+			System.out.println("---------------지금 계좌개설하면 즉시 현금 지급 이벤트!(계좌로 입금됩니다.)---------------");
 			System.out.print("실행하실 항목의 번호를 입력해주십시오. >> ");
 
 			String selectNo = scanner.nextLine();
@@ -26,7 +26,6 @@ public class BankApplication {
 			case 1:
 				System.out.println("------------------------------------------------");
 				System.out.println("=====================계좌개설=====================");
-				System.out.println("--지금 계좌개설하면 즉시 현금 지급 이벤트!(계좌로 입금됩니다.)--");
 				createAccount();
 				break;
 			case 2:
@@ -45,10 +44,19 @@ public class BankApplication {
 				bankWithdraw();
 				break;
 			case 5:
+				System.out.println("------------------------------------------------");
+				System.out.println("=====================계좌송금=====================");
+				bankRemit();
 				break;
 			case 6:
+				System.out.println("------------------------------------------------");
+				System.out.println("===================== $환 전 =====================");
+				bankExchange();
 				break;
 			case 7:
+				System.out.println("-------------------------------------------------");
+				System.out.println("====================비밀번호변경====================");
+				editAccount();
 				break;
 			default:
 				System.out.print("1~8 중에서 입력해주십시오. >> ");
@@ -112,7 +120,7 @@ public class BankApplication {
 			if (accounts.get(accountIndex).getAccountPassword() == Integer.parseInt(tmp))
 				System.out.println(accounts.get(accountIndex));
 			else
-				System.out.println("비밀번호가 틀렸습니다.");
+				System.out.println("비밀번호가 틀립니다.");
 		}
 	}
 
@@ -164,7 +172,7 @@ public class BankApplication {
 			tmp = scanner.nextLine();
 			// 계좌의 비밀번호와 맞는지 검사
 			if (accounts.get(accountIndex).getAccountPassword() != Integer.parseInt(tmp)) {
-				System.out.println("비밀번호가 틀렸습니다.");
+				System.out.println("비밀번호가 틀립니다.");
 				break;
 			}
 			System.out.print("찾으실 금액을 입력해주십시오. >> ");
@@ -178,6 +186,134 @@ public class BankApplication {
 			}
 			accounts.get(accountIndex).setAccountBalance(withdraw);
 			System.out.println(accounts.get(accountIndex)); // 업데이트된 계좌 출력
+		}
+	}
+
+	// 5.계좌송금
+	public static void bankRemit() {
+		// 보내는 계좌
+		System.out.print("본인의 계좌 번호를 입력해주십시오. >> ");
+		String tmp = scanner.nextLine().replaceAll(" |-", ""); // 공백, - 제거
+		tmp = tmp.substring(0, 3) + "-" + tmp.substring(3, 6) + "-" + tmp.substring(6); // 양식에 맞게 - 삽입
+		int accountIndex = accounts.indexOf(findAccount(tmp)); // 계좌번호에 맞는 계좌를 검색하여 해당 인덱스 저장
+		switch (accountIndex) { // 인덱스에 따른 루트
+		case -1: // 계좌번호에 맞는 계좌가 없을 시
+			System.out.println("없는 계좌입니다.");
+			break;
+		default:
+			System.out.print("계좌 비밀번호를 입력해주십시오. >> ");
+			tmp = scanner.nextLine();
+			// 계좌의 비밀번호와 맞는지 검사
+			if (accounts.get(accountIndex).getAccountPassword() != Integer.parseInt(tmp)) {
+				System.out.println("비밀번호가 틀립니다.");
+				break;
+			}
+			// 받는 계좌
+			System.out.print("상대의 계좌 번호를 입력해주십시오. >> ");
+			tmp = scanner.nextLine().replaceAll(" |-", ""); // 공백, - 제거
+			tmp = tmp.substring(0, 3) + "-" + tmp.substring(3, 6) + "-" + tmp.substring(6); // 양식에 맞게 - 삽입
+			int anotherIndex = accounts.indexOf(findAccount(tmp)); // 계좌번호에 맞는 계좌를 검색하여 해당 인덱스 저장
+			switch (anotherIndex) {
+			case -1: // 계좌번호에 맞는 계좌가 없을 시
+				System.out.println("없는 계좌입니다.");
+				break;
+			default:
+				// 상대 이름 확인
+				String owner = accounts.get(anotherIndex).getAccountOwner();
+				System.out.print(owner + " > 상대의 이름이 맞으면 그 이름을, 틀리면 아무 글자를 입력해주십시오. >> ");
+				tmp = scanner.nextLine().replace(" ", "");
+				if (owner.equals(tmp)) {
+					System.out.print("보내실 금액을 입력해주십시오. >> ");
+					tmp = scanner.nextLine();
+					int remit = Integer.parseInt(tmp);
+					// 잔고가 충분한지 검사
+					if (accounts.get(accountIndex).getAccountBalance() - remit < 0) {
+						System.out.println("잔고가 부족합니다.");
+						break;
+					}
+					// 출금과 입금
+					accounts.get(accountIndex)
+							.setAccountBalance(accounts.get(accountIndex).getAccountBalance() - remit);
+					accounts.get(anotherIndex)
+							.setAccountBalance(accounts.get(anotherIndex).getAccountBalance() + remit);
+					System.out.println(accounts.get(accountIndex)); // 업데이트된 계좌 출력
+				}
+				break;
+			}
+		}
+	}
+
+	// 6.$환전
+	public static void bankExchange() {
+		System.out.println("현재 환율 [1 미국 달러 = 1,237.64원]");
+		System.out.print("출금할 계좌 번호를 입력해주십시오. >> ");
+		String tmp = scanner.nextLine().replaceAll(" |-", ""); // 공백, - 제거
+		tmp = tmp.substring(0, 3) + "-" + tmp.substring(3, 6) + "-" + tmp.substring(6); // 양식에 맞게 - 삽입
+		int accountIndex = accounts.indexOf(findAccount(tmp)); // 계좌번호에 맞는 계좌를 검색하여 해당 인덱스 저장
+		switch (accountIndex) { // 인덱스에 따른 루트
+		case -1: // 계좌번호에 맞는 계좌가 없을 시
+			System.out.println("없는 계좌입니다.");
+			break;
+		default:
+			System.out.print("계좌 비밀번호를 입력해주십시오. >> ");
+			tmp = scanner.nextLine();
+			// 계좌의 비밀번호와 맞는지 검사
+			if (accounts.get(accountIndex).getAccountPassword() != Integer.parseInt(tmp)) {
+				System.out.println("비밀번호가 틀립니다.");
+				break;
+			}
+			System.out.print("환전하실 금액(원)을 입력해주십시오. >> ");
+			tmp = scanner.nextLine();
+			int exchange = Integer.parseInt(tmp);
+			// 잔고가 충분한지 검사
+			if (accounts.get(accountIndex).getAccountBalance() - exchange < 0) {
+				System.out.println("잔고가 부족합니다.");
+				break;
+			}
+			// 계좌의 잔고를 불러와 출금액을 뺀 뒤 잔고를 업데이트
+			accounts.get(accountIndex).setAccountBalance(accounts.get(accountIndex).getAccountBalance() - exchange);
+			// 달러 변환
+			double dollar = (double) exchange / 1237.64;
+			System.out.printf("%.2f달러가 환전되었습니다.\n", dollar);
+			System.out.println(accounts.get(accountIndex)); // 업데이트된 계좌 출력
+		}
+	}
+
+	// 7.비밀번호변경
+	public static void editAccount() {
+		System.out.print("계좌번호를 입력해주십시오. >> ");
+		String tmp = scanner.nextLine().replaceAll(" |-", ""); // 공백, - 제거
+		tmp = tmp.substring(0, 3) + "-" + tmp.substring(3, 6) + "-" + tmp.substring(6); // 양식에 맞게 - 삽입
+		int accountIndex = accounts.indexOf(findAccount(tmp)); // 계좌번호에 맞는 계좌를 검색하여 해당 인덱스 저장
+		switch (accountIndex) { // 인덱스에 따른 루트
+		case -1: // 계좌번호에 맞는 계좌가 없을 시
+			System.out.println("없는 계좌입니다.");
+			break;
+		default:
+			System.out.print("계좌주의 성함을 입력해주십시오. >> ");
+			tmp = scanner.nextLine().replace(" ", ""); // 공백 제거
+			if (!accounts.get(accountIndex).getAccountOwner().equals(tmp)) {
+				System.out.println("잘못된 입력입니다.");
+				break;
+			}
+			int count = 0;
+			while (true) {
+				count++;
+				System.out.print("기존 비밀번호를 입력해주십시오. >> ");
+				tmp = scanner.nextLine();
+				// 계좌의 비밀번호와 맞는지 검사
+				if (accounts.get(accountIndex).getAccountPassword() == Integer.parseInt(tmp)) {
+					System.out.print("신규 비밀번호를 입력해주십시오. >> ");
+					tmp = scanner.nextLine();
+					int password = Integer.parseInt(tmp);
+					// 비밀번호 변경
+					accounts.get(accountIndex).setAccountPassword(password);
+					break;
+				}
+				System.out.printf("비밀번호를 %d회 틀렸습니다.(3회 시 종료)\n", count);
+				if (count == 3)
+					break;
+			}
 		}
 	}
 }
