@@ -7,19 +7,8 @@ public class BankService {
 	private List<Bank> accounts = new ArrayList<>();
 	private String number;
 	private int balance;
-
-	// 1.계좌개설
-	public void createAccount(String owner, int password) {
-		// 1000~10000원 지급
-		balance = (int) (Math.round((Math.random() * 10000 + 500) / 1000) * 1000);
-		System.out.println("축하합니다! " + balance + "원에 당첨되었습니다.");
-		// 계좌번호 뒷자리 부여
-		number = String.format("110-%03d", accounts.size() + 1);
-		// 신규 계좌를 0번 리스트에 입력 및 출력
-		accounts.add(new Bank(number, owner, password, balance));
-		System.out.println(accounts.get(accounts.size() - 1));
-	}
-
+	
+	// 계좌 검색
 	private int findAccount(String number) {
 		// 양식에 맞게 - 삽입
 		number = number.substring(0, 3) + "-" + number.substring(3);
@@ -33,6 +22,18 @@ public class BankService {
 		}
 		// 계좌의 인덱스 반환
 		return accountIndex;
+	}
+
+	// 1.계좌개설
+	public void createAccount(String owner, int password) {
+		// 1000~10000원 지급
+		balance = (int) (Math.round((Math.random() * 10000 + 500) / 1000) * 1000);
+		System.out.println("축하합니다! " + balance + "원에 당첨되었습니다.");
+		// 계좌번호 뒷자리 부여
+		number = String.format("110-%03d", accounts.size() + 1);
+		// 신규 계좌를 0번 리스트에 입력 및 출력
+		accounts.add(new Bank(number, owner, password, balance));
+		System.out.println(accounts.get(accounts.size() - 1));
 	}
 
 	// 2.계좌조회
